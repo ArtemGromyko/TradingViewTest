@@ -60,23 +60,95 @@ public class GetAllService
         return stockFundamentals;
     }
 
-    public async Task GetAllAsync()
+    /*public async Task<List<AllDto>> GetAllAsync()
     {
         var symbols = await GetSymbolsAsync();
         var symbolNames = symbols.Select(symbol => symbol.Symbol).ToList();
 
+        var stockProfileTasks = new List<Task<StockProfile>>();
+        var stockFundamentalsTasks = new List<Task<StockFundamentals>>();
+        
+
         var skip = 0;
-        var take = 9;
-        var delay = 1000;
+        var take = 5;
+        var delay = 2000;
 
         do
         {
             var currentSymbols = symbolNames.Skip(skip).Take(take).ToList();
 
+            foreach (var symbol in currentSymbols)
+            {
+                var stockProfileTask = GetStockProfileAsync(symbol);
+                var stockFundamentalsTask = GetStockFundamentalsAsync(symbol);
+
+                stockFundamentalsTasks.Add(stockFundamentalsTask);
+                stockProfileTasks.Add(stockProfileTask);
+
+                skip += 5;
+            }
 
             await Task.Delay(delay);
+
             delay += 1000;
         }
         while (skip < symbols.Count);
+
+        var stockProfiles = await Task.WhenAll(stockProfileTasks);
+        var stockFundamentals = await Task.WhenAll(stockFundamentalsTasks);
+
+        var orderedStockProfiles = stockProfiles.OrderBy(sp => sp.SymbolName).ToList();
+        var orderStockFundamentals = stockFundamentals.OrderBy(sf => sf.SymbolName).ToList();
+
+        var allDtos = orderedStockProfiles.Zip(orderStockFundamentals, (sp, sf) =>
+            new AllDto { SymbolName = sp.SymbolName, StockProfile = sp.StockProfileItem, StockFundamentals = sf.StockFundamentalsItem});
+
+        return allDtos.ToList();
+    }*/
+
+    public async Task<List<AllDto>> GetAllAsync()
+    {
+        var symbols = await GetSymbolsAsync();
+        var symbolNames = symbols.Select(symbol => symbol.Symbol).ToList();
+
+        var stockProfileTasks = new List<Task<StockProfile>>();
+        var stockFundamentalsTasks = new List<Task<StockFundamentals>>();
+
+
+        var skip = 0;
+        var take = 5;
+        var delay = 2000;
+
+        do
+        {
+            var currentSymbols = symbolNames.Skip(skip).Take(take).ToList();
+
+            foreach (var symbol in currentSymbols)
+            {
+                var stockProfileTask = GetStockProfileAsync(symbol);
+                var stockFundamentalsTask = GetStockFundamentalsAsync(symbol);
+
+                stockFundamentalsTasks.Add(stockFundamentalsTask);
+                stockProfileTasks.Add(stockProfileTask);
+
+                skip += 5;
+            }
+
+            await Task.Delay(delay);
+
+            delay += 1000;
+        }
+        while (skip < symbols.Count);
+
+        var stockProfiles = await Task.WhenAll(stockProfileTasks);
+        var stockFundamentals = await Task.WhenAll(stockFundamentalsTasks);
+
+        var orderedStockProfiles = stockProfiles.OrderBy(sp => sp.SymbolName).ToList();
+        var orderStockFundamentals = stockFundamentals.OrderBy(sf => sf.SymbolName).ToList();
+
+        var allDtos = orderedStockProfiles.Zip(orderStockFundamentals, (sp, sf) =>
+            new AllDto { SymbolName = sp.SymbolName, StockProfile = sp.StockProfileItem, StockFundamentals = sf.StockFundamentalsItem });
+
+        return allDtos.ToList();
     }
 }

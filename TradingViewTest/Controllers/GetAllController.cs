@@ -17,7 +17,9 @@ namespace TradingViewTest.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var dtos = await _service.GetAllAsync();
+
+            return Ok(dtos);
         }
 
         [HttpGet("symbols")]
