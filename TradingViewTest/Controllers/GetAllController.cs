@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TradingViewTest.Services;
+using TradingView.BLL.Services;
 
 namespace TradingViewTest.Controllers
 {
-    [Route("api/get-all")]
+    [Route("api/stock-data")]
     [ApiController]
     public class GetAllController : ControllerBase
     {

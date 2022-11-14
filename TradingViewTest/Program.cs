@@ -1,4 +1,5 @@
 using Serilog;
+using TradingView.BLL.Services;
 using TradingViewTest.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,9 +19,7 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 services.AddScoped<Aggreagator>();
-services.AddScoped<RandomGenerator>();
 services.AddScoped<GetAllService>();
-services.AddScoped(typeof(Repository<>));
 
 services.AddHttpClient(configuration["HttpClientName"], client =>
 {
