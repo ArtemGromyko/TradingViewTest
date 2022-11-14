@@ -1,13 +1,19 @@
+using Serilog;
 using TradingViewTest.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmm");
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .WriteTo.Console();
+});
+
 var services = builder.Services;
 var configuration = builder.Configuration;
 
 builder.Services.AddControllers().AddNewtonsoftJson();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 

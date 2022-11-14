@@ -2,12 +2,12 @@
 
 public class IncomeItem
 {
-    public DateTime ReportDate { get; set; }
+    public DateTime? ReportDate { get; set; }
     public string FilingType { get; set; }
-    public DateTime FiscalDate { get; set; }
+    public DateTime? FiscalDate { get; set; }
     public int? FiscalQuarter { get; set; }
     public int? FiscalYear { get; set; }
-    public string? Currency { get; set; }
+    public string Currency { get; set; }
     public double? TotalRevenue { get; set; }
     public double? CostOfRevenue { get; set; }
     public double? GrossProfit { get; set; }
