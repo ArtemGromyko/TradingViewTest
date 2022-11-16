@@ -1,6 +1,6 @@
 ﻿namespace Entites;
 
-public class SymbolInfo
+public class SymbolInfo : EntityBase
 {
     public string Symbol { get; set; }
     public string Exchange { get; set; }

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Entites.StockFundamentals;
 
-public class StockFundamentalsItem : EntityBase
+public class StockFundamentalsItem
 {
     public FinancialsEntity Financials { get; set; }
     public List<Split> Splits { get; set; }

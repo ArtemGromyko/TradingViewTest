@@ -1,6 +1,6 @@
 ﻿namespace Entites.StockProfile;
 
-public class Logo : EntityBase
+public class Logo
 {
     public string Url { get; set; }
 }

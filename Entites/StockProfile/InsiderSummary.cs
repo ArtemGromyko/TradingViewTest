@@ -2,7 +2,7 @@
 
 namespace Entites.StockProfile;
 
-public class InsiderSummary : EntityBase
+public class InsiderSummary
 {
     public string FullName { get; set; }
     public int? NetTransacted { get; set; }

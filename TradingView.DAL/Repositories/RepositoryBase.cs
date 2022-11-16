@@ -2,7 +2,7 @@
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System.Linq.Expressions;
-using TradingView.DAL.Abstractions;
+using TradingView.DAL.Abstractions.Repositories;
 using TradingView.DAL.Settings;
 
 namespace TradingView.DAL.Repositories;

@@ -1,6 +1,6 @@
 using Serilog;
 using TradingView.BLL.Services;
-using TradingViewTest.Services;
+using TradingViewTest.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,13 +18,13 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
-services.AddScoped<Aggreagator>();
-services.AddScoped<GetAllService>();
+services.ConfigureRepositories();
+services.ConfigureServices();
+services.ConfigureApiServices();
+services.ConfigureHttpClient(configuration);
+services.ConfigureMongoDBConnection(configuration);
 
-services.AddHttpClient(configuration["HttpClientName"], client =>
-{
-    client.BaseAddress = new Uri(configuration["IEXCloudUrls:baseUrl"]);
-});
+services.AddScoped<GetAllService>();
 
 var app = builder.Build();
 

@@ -2,7 +2,7 @@
 
 namespace Entites.StockProfile;
 
-public class InsiderTransactions : EntityBase
+public class InsiderTransactions
 {
     public double? ConversionOrExercisePrice { get; set; }
     public char? DirectIndirect { get; set; }

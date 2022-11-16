@@ -1,7 +1,7 @@
 ﻿using Entites.StockProfile;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using TradingView.DAL.Abstractions;
+using TradingView.DAL.Abstractions.Repositories;
 using TradingView.DAL.Settings;
 
 namespace TradingView.DAL.Repositories;

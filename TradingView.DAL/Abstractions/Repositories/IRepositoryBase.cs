@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace TradingView.DAL.Abstractions;
+namespace TradingView.DAL.Abstractions.Repositories;
 
 public interface IRepositoryBase<TEntity>
 {
