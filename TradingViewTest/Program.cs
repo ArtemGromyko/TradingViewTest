@@ -1,5 +1,6 @@
 using Serilog;
 using TradingView.BLL.Services;
+using TradingView.DAL.Quartz;
 using TradingViewTest.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,8 @@ services.ConfigureApiServices();
 services.ConfigureHttpClient(configuration);
 services.ConfigureMongoDBConnection(configuration);
 
+services.ConfigureJobs();
+
 services.AddScoped<GetAllService>();
 
 var app = builder.Build();
@@ -40,5 +43,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.StartJobs();
 
 app.Run();

@@ -1,6 +1,5 @@
 ﻿using Entites;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http;
 using TradingView.DAL.Abstractions.ApiServices;
 
 namespace TradingView.DAL.ApiServices;
@@ -18,7 +17,7 @@ public class SymbolApiService : ISymbolApiService
 
     public async Task<List<SymbolInfo>> FetchSymbolsAsync()
     {
-        var httpClient = _httpClientFactory.CreateClient("");
+        var httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
 
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                $"{_configuration["IEXCloudUrls:symbolUrl"]}" +

@@ -11,14 +11,11 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
+    <PackageReference Include="Quartz" Version="3.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Entites\Entites.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Jobs\" />
   </ItemGroup>
 
 </Project>

@@ -3,6 +3,9 @@ using TradingView.BLL.Services;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
 using TradingView.DAL.ApiServices;
+using TradingView.DAL.Quartz;
+using TradingView.DAL.Quartz.Jobs;
+using TradingView.DAL.Quartz.Schedulers;
 using TradingView.DAL.Repositories;
 using TradingView.DAL.Settings;
 
@@ -39,5 +42,29 @@ public static class ServiceExtensions
     public static void ConfigureApiServices(this IServiceCollection services)
     {
         services.AddScoped<ISymbolApiService, SymbolApiService>();
+        services.AddScoped<IStockProfileApiService, StockProfileApiService>();
+        services.AddScoped<IStockFundamentalsApiService, StockFundamentalsApiService>();
+    }
+
+    public static void ConfigureJobs(this IServiceCollection services)
+    {
+        services.AddTransient<JobFactory>();
+
+        services.AddScoped<StockDataJob>();
+    }
+
+    public static void StartJobs(this WebApplication host)
+    {
+        using var scope = host.Services.CreateScope();
+
+        var serviceProvider = scope.ServiceProvider;
+        try
+        {
+            StockDataScheduler.Start(serviceProvider);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
