@@ -11,11 +11,11 @@ public class Dividend
     public string Frequency { get; set; }
     public string PaymentDate { get; set; }
     public string RecordDate { get; set; }
-    public double? Refid { get; set; }
+    public long? Refid { get; set; }
     public string Symbol { get; set; }
     public string Id { get; set; }
     public string Key { get; set; }
     public string Subkey { get; set; }
-    public double? Date { get; set; }
+    public long? Date { get; set; }
     public double? Updated { get; set; }
 }

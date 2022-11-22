@@ -41,7 +41,6 @@ public class StockDataJob : IJob
         var stockProfileTasks = new List<Task<StockProfile>>();
         var stockFundamentalsTasks = new List<Task<StockFundamentals>>();
 
-
         var skip = 0;
         var take = 5;
         var delay = 1500;

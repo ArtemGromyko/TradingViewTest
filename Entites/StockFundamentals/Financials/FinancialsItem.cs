@@ -2,73 +2,74 @@
 
 public class FinancialsItem
 {
-    public double? EBITDA { get; set; }
-    public double? AccountsPayable { get; set; }
-    public double? CapitalSurplus { get; set; }
-    public double? CashChange { get; set; }
-    public double? CashFlow { get; set; }
-    public double? CashFlowFinancing { get; set; }
-    public double? ChangesInInventories { get; set; }
-    public double? ChangesInReceivables { get; set; }
+    public long? AccountsPayable { get; set; }
+    public double? capitalSurplus { get; set; }
+    public long? cashChange { get; set; }
+    public long? CashFlow { get; set; }
+    public long? CashFlowFinancing { get; set; }
+    public long? ChangesInInventories { get; set; }
+    public long? ChangesInReceivables { get; set; }
     public long? CommonStock { get; set; }
-    public double? CostOfRevenue { get; set; }
+    public long? CostOfRevenue { get; set; }
     public string Currency { get; set; }
-    public double? CurrentAssets { get; set; }
-    public double? CurrentCash { get; set; }
-    public double? CurrentDebt { get; set; }
-    public double? CurrentLongTermDebt { get; set; }
-    public double? Depreciation { get; set; }
+    public long? CurrentAssets { get; set; }
+    public long? CurrentCash { get; set; }
+    public long? CurrentDebt { get; set; }
+    public long? CurrentLongTermDebt { get; set; }
+    public long? Depreciation { get; set; }
     public double? DividendsPaid { get; set; }
-    public double? Ebit { get; set; }
+    public long? Ebit { get; set; }
+    public long? EBITDA { get; set; }
     public double? ExchangeRateEffect { get; set; }
     public string FilingType { get; set; }
-    public DateTime? FiscalDate { get; set; }
-    public int? FiscalQuarter { get; set; }
+    public string FiscalDate { get; set; }
+    public long? FiscalQuarter { get; set; }
     public int? FiscalYear { get; set; }
     public long? Goodwill { get; set; }
-    public double? GrossProfit { get; set; }
-    public double? IncomeTax { get; set; }
-    public double? IntangibleAssets { get; set; }
-    public double? InterestIncome { get; set; }
-    public double? Inventory { get; set; }
+    public long? GrossProfit { get; set; }
+    public long? IncomeTax { get; set; }
+    public long? IntangibleAssets { get; set; }
+    public long? InterestIncome { get; set; }
+    public long? Inventory { get; set; }
     public double? InvestingActivityOther { get; set; }
     public double? Investments { get; set; }
-    public double? LongTermDebt { get; set; }
-    public double? LongTermInvestments { get; set; }
-    public double? MinorityInterest { get; set; }
-    public double? NetBorrowings { get; set; }
-    public double? NetIncome { get; set; }
-    public double? NetIncomeBasic { get; set; }
-    public double? NetTangibleAssets { get; set; }
-    public double? OperatingExpense { get; set; }
-    public double? OperatingIncome { get; set; }
-    public double? OperatingRevenue { get; set; }
-    public double? OtherAssets { get; set; }
-    public double? OtherCurrentAssets { get; set; }
-    public double? OtherCurrentLiabilities { get; set; }
-    public double? OtherIncomeExpenseNet { get; set; }
-    public double? OtherLiabilities { get; set; }
-    public double? PretaxIncome { get; set; }
-    public double? PropertyPlantEquipment { get; set; }
-    public double? Receivables { get; set; }
-    public DateTime? ReportDate { get; set; }
-    public double? ResearchAndDevelopment { get; set; }
-    public double? RetainedEarnings { get; set; }
-    public double? Revenue { get; set; }
-    public double? SellingGeneralAndAdmin { get; set; }
-    public double? ShareholderEquity { get; set; }
-    public double? ShortTermDebt { get; set; }
-    public double? ShortTermInvestments { get; set; }
+    public long? LongTermDebt { get; set; }
+    public long? LongTermInvestments { get; set; }
+    public long? MinorityInterest { get; set; }
+    public long? NetBorrowings { get; set; }
+    public long? NetIncome { get; set; }
+    public long? NetIncomeBasic { get; set; }
+    public long? NetTangibleAssets { get; set; }
+    public long? OperatingExpense { get; set; }
+    public long? OperatingIncome { get; set; }
+    public long? OperatingRevenue { get; set; }
+    public long? OtherAssets { get; set; }
+    public long? OtherCurrentAssets { get; set; }
+    public long? OtherCurrentLiabilities { get; set; }
+    public long? OtherIncomeExpenseNet { get; set; }
+    public long? OtherLiabilities { get; set; }
+    public long? PretaxIncome { get; set; }
+    public long? PropertyPlantEquipment { get; set; }
+    public long? Receivables { get; set; }
+    public string ReportDate { get; set; }
+    public long? ResearchAndDevelopment { get; set; }
+    public long? RetainedEarnings { get; set; }
+    public long? Revenue { get; set; }
+    public long? SellingGeneralAndAdmin { get; set; }
+    public long? ShareholderEquity { get; set; }
+    public long? ShortTermDebt { get; set; }
+    public long? ShortTermInvestments { get; set; }
     public string Symbol { get; set; }
-    public double? TotalAssets { get; set; }
-    public double? TotalCash { get; set; }
-    public double? TotalDebt { get; set; }
-    public double? TotalInvestingCashFlows { get; set; }
-    public double? TotalLiabilities { get; set; }
-    public double? TotalRevenue { get; set; }
-    public double? TreasuryStock { get; set; }
+    public long? TotalAssets { get; set; }
+    public long? TotalCash { get; set; }
+    public long? TotalDebt { get; set; }
+    public long? TotalInvestingCashFlows { get; set; }
+    public long? TotalLiabilities { get; set; }
+    public long? TotalRevenue { get; set; }
+    public long? TreasuryStock { get; set; }
     public string Id { get; set; }
     public string Key { get; set; }
     public string Subkey { get; set; }
-    public long? Updated { get; set; }
+    public long? Date { get; set; }
+    public double? Updated { get; set; }
 }

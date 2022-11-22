@@ -25,6 +25,7 @@ public static class ServiceExtensions
         services.AddScoped<ISymbolRepository, SymbolRepository>();
         services.AddScoped<IStockProfileRepository, StockProfileRepository>();
         services.AddScoped<IStockFundamentalsRepository, StockFundamentalsRepository>();
+        services.AddScoped<IFinancialsAsReportedRepository, FinancialsAsReportedRepository>();
     }
 
     public static void ConfigureHttpClient(this IServiceCollection services, IConfiguration configuration) =>
@@ -44,6 +45,7 @@ public static class ServiceExtensions
         services.AddScoped<ISymbolApiService, SymbolApiService>();
         services.AddScoped<IStockProfileApiService, StockProfileApiService>();
         services.AddScoped<IStockFundamentalsApiService, StockFundamentalsApiService>();
+        services.AddScoped<IFinancialsAsReportedApiService, FinancialsAsReportedApiService>();
     }
 
     public static void ConfigureJobs(this IServiceCollection services)

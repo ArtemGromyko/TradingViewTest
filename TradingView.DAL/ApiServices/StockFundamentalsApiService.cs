@@ -26,6 +26,7 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
 
         var response = await httpClient.GetAsync(url);
         var stringResult = await response.Content.ReadAsStringAsync();
+
         var jsonParsed = JObject.Parse(stringResult);
         var item = jsonParsed[$"{symbol.ToUpper()}"];
 

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TradingView.DAL.Quartz.Schedulers;
 
-public class StockDataScheduler
+public class FinancialsAsReportedScheduler
 {
     public static async void Start(IServiceProvider serviceProvider)
     {
@@ -13,11 +13,11 @@ public class StockDataScheduler
         scheduler.JobFactory = serviceProvider.GetService<JobFactory>();
         await scheduler.Start();
 
-        IJobDetail job = JobBuilder.Create<StockDataJob>()
+        IJobDetail job = JobBuilder.Create<FinancialsAsReportedJob>()
             .Build();
 
         ITrigger trigger = TriggerBuilder.Create()
-            .WithIdentity("StockDataTrigger", "default")
+            .WithIdentity("FinancialsAsReportedTrigger", "default")
             .WithCronSchedule("0 */5 * ? * *", x => x.InTimeZone(TimeZoneInfo.Utc)) //Updates at 4am and 5am UTC every day
             .Build();
 

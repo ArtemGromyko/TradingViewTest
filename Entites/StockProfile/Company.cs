@@ -12,8 +12,8 @@ public class Company
     public string SecurityName { get; set; }
     public string IssueType { get; set; }
     public string Sector { get; set; }
-    public int? PrimarySicCode { get; set; }
-    public int? Employees { get; set; }
+    public long? PrimarySicCode { get; set; }
+    public long? Employees { get; set; }
     public List<string> Tags { get; set; }
     public string Address { get; set; }
     public string Address2 { get; set; }

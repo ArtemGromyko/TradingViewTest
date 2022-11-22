@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TradingView.BLL.Abstractions;
 using TradingView.BLL.Services;
+using TradingView.DAL.Abstractions.ApiServices;
+using TradingView.DAL.Abstractions.Repositories;
 
 namespace TradingViewTest.Controllers
 {
@@ -14,13 +16,25 @@ namespace TradingViewTest.Controllers
         private readonly IStockProfileService _stockProfileService;
         private readonly IStockFundamentalsService _stockFundamentalsProfile;
 
+        private readonly ISymbolRepository _symbolRepository;
+        private readonly IStockProfileRepository _stockProfileRepository;
+        private readonly IStockFundamentalsRepository _stockFundamentalsRepository;
+        private readonly IFinancialsAsReportedRepository _financialsAsReportedRepository;
+
+        private readonly IFinancialsAsReportedApiService _financialsAsReportedApiService;
+
         public StockDataController(GetAllService service, ISymbolService symbolService,
-            IStockFundamentalsService stockFundamentalsProfile, IStockProfileService stockProfileService)
+            IStockFundamentalsService stockFundamentalsProfile, IStockProfileService stockProfileService, ISymbolRepository symbolRepository, IStockProfileRepository stockProfileRepository, IStockFundamentalsRepository stockFundamentalsRepository, IFinancialsAsReportedRepository financialsAsReportedRepository, IFinancialsAsReportedApiService financialsAsReportedApiService)
         {
             _service = service;
             _symbolService = symbolService;
             _stockFundamentalsProfile = stockFundamentalsProfile;
             _stockProfileService = stockProfileService;
+            _symbolRepository = symbolRepository;
+            _stockProfileRepository = stockProfileRepository;
+            _stockFundamentalsRepository = stockFundamentalsRepository;
+            _financialsAsReportedRepository = financialsAsReportedRepository;
+            _financialsAsReportedApiService = financialsAsReportedApiService;
         }
 
         [HttpGet]
@@ -53,6 +67,25 @@ namespace TradingViewTest.Controllers
             var stockFundamentals = await _stockFundamentalsProfile.GetStockFundamentalsAsync(symbol);
 
             return Ok(stockFundamentals);
+        }
+
+        [HttpGet("{symbol}/financials")]
+        public async Task<IActionResult> GetFinancialsAsync(string symbol)
+        {
+            var financials = await _financialsAsReportedApiService.FetchFinancialsAsReportedAsync(symbol);
+
+            return Ok(financials);
+        }
+
+        [HttpGet("delete")]
+        public async Task<IActionResult> DeleteAsync()
+        {
+            await _stockProfileRepository.DeleteAllAsync();
+            await _stockFundamentalsRepository.DeleteAllAsync();
+            await _symbolRepository.DeleteAllAsync();
+            await _financialsAsReportedRepository.DeleteAllAsync();
+
+            return Ok();
         }
     }
 }

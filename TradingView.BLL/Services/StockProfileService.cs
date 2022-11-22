@@ -1,5 +1,6 @@
 ﻿using Entites.StockProfile;
 using TradingView.BLL.Abstractions;
+using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
 
 namespace TradingView.BLL.Services;
@@ -7,16 +8,20 @@ namespace TradingView.BLL.Services;
 public class StockProfileService : IStockProfileService
 {
     private readonly IStockProfileRepository _stockProfileRepository;
+    private readonly IStockProfileApiService _stockProfileApiService;
 
-    public StockProfileService(IStockProfileRepository stockProfileRepository)
+    public StockProfileService(IStockProfileRepository stockProfileRepository, IStockProfileApiService stockProfileApiService)
     {
         _stockProfileRepository = stockProfileRepository;
+        _stockProfileApiService = stockProfileApiService;
     }
 
     public async Task<StockProfile> GetStockProfileAsync(string symbol)
     {
         var stockProfile = await _stockProfileRepository.GetAsync(
             (s) => s.SymbolName.ToUpper() == symbol.ToUpper());
+
+        // var stockProfile = await _stockProfileApiService.FetchStockProfileAsync(symbol);
 
         return stockProfile;
     }

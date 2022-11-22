@@ -6,12 +6,13 @@ public class CEOCompensation
     public string Name { get; set; }
     public string CompanyName { get; set; }
     public string Location { get; set; }
-    public double? Salary { get; set; }
-    public double? StockAwards { get; set; }
-    public double? OptionAwards { get; set; }
-    public double? NonEquityIncentives { get; set; }
-    public double? PensionAndDeferred { get; set; }
-    public double? OtherComp { get; set; }
-    public double? Total { get; set; }
+    public long? Salary { get; set; }
+    public long? Bonus { get; set; }
+    public long? StockAwards { get; set; }
+    public long? OptionAwards { get; set; }
+    public long? NonEquityIncentives { get; set; }
+    public long? PensionAndDeferred { get; set; }
+    public long? OtherComp { get; set; }
+    public long? Total { get; set; }
     public string Year { get; set; }
 }

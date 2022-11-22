@@ -2,9 +2,9 @@
 
 public class Split
 {
-    public DateTime? DeclaredDate { get; set; }
+    public string DeclaredDate { get; set; }
     public string Description { get; set; }
-    public DateTime? ExDate { get; set; }
+    public string ExDate { get; set; }
     public int? FromFactor { get; set; }
     public double? Ratio { get; set; }
     public long? Refid { get; set; }
@@ -13,5 +13,6 @@ public class Split
     public string Id { get; set; }
     public string Key { get; set; }
     public string Subkey { get; set; }
-    public long? Updated { get; set; }
+    public long Date { get; set; }
+    public double? Updated { get; set; }
 }
