@@ -33,7 +33,7 @@ public class FinancialsAsReportedJob : IJob
             await symbolRepository.AddCollectionAsync(symbols);
         }
 
-        var symbolNames = symbols.Select(symbol => symbol.Name).Take(100).ToList();
+        var symbolNames = symbols.Select(symbol => symbol.Symbol).Take(100).ToList();
 
         var financialsAsReportedTasks = new List<Task<FinancialsAsReported>>();
 
@@ -48,7 +48,9 @@ public class FinancialsAsReportedJob : IJob
             foreach (var symbol in currentSymbols)
             {
                 var financialsAsReported = financialsAsReportedApiService.FetchFinancialsAsReportedAsync(symbol);
-                await Task.Delay(250);
+                await Task.Delay(300);
+
+                financialsAsReportedTasks.Add(financialsAsReported);
             }
 
             skip += 5;

@@ -53,6 +53,7 @@ public static class ServiceExtensions
         services.AddTransient<JobFactory>();
 
         services.AddScoped<StockDataJob>();
+        services.AddScoped<FinancialsAsReportedJob>();
     }
 
     public static void StartJobs(this WebApplication host)
@@ -62,7 +63,8 @@ public static class ServiceExtensions
         var serviceProvider = scope.ServiceProvider;
         try
         {
-            StockDataScheduler.Start(serviceProvider);
+            //StockDataScheduler.Start(serviceProvider);
+            FinancialsAsReportedScheduler.Start(serviceProvider);
         }
         catch (Exception)
         {

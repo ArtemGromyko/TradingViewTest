@@ -1,6 +1,7 @@
 ﻿using Entites.StockFundamentals.BalanceSheet;
 using Entites.StockFundamentals.CashFlow;
 using Entites.StockFundamentals.Financials;
+using Entites.StockFundamentals.FinancialsAsReported;
 using Entites.StockFundamentals.IncomeStatement;
 using Newtonsoft.Json;
 
@@ -16,4 +17,5 @@ public class StockFundamentalsItem
     public IncomeEntity Income { get; set; }
     [JsonProperty("cash-flow")]
     public CashFlowEntity CashFlow { get; set; }
+    public List<FinancialsAsReportedItem> FinancialsAsReported { get; set; } 
 }

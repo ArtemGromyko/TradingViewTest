@@ -28,7 +28,7 @@ public class FinancialsAsReportedItem
     public long? CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedGainBeforeTax { get; set; }
     public long? CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedLossBeforeTax { get; set; }
     public string Cik { get; set; }
-    public long? CityAreaCode { get; set; }
+    public string CityAreaCode { get; set; }
     public long? CommercialPaper { get; set; }
     public double? CommonStockDividendsPerShareDeclared { get; set; }
     public double? CommonStockParOrStatedValuePerShare { get; set; }
@@ -95,7 +95,7 @@ public class FinancialsAsReportedItem
     public long? EmployeeServiceShareBasedCompensationTaxBenefitFromCompensationExpense { get; set; }
     public string EntityAddressAddressLine1 { get; set; }
     public string EntityAddressCityOrTown { get; set; }
-    public long? EntityAddressPostalZipCode { get; set; }
+    public string EntityAddressPostalZipCode { get; set; }
     public string EntityAddressStateOrProvince { get; set; }
     public long? EntityCentralIndexKey { get; set; }
     public string EntityCurrentReportingStatus { get; set; }

@@ -44,6 +44,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//app.StartJobs();
+app.StartJobs();
 
 app.Run();
