@@ -1,4 +1,5 @@
 ﻿using Entites;
+using Entites.Exceptions;
 using Microsoft.Extensions.Configuration;
 using TradingView.DAL.Abstractions.ApiServices;
 
@@ -21,9 +22,13 @@ public class SymbolApiService : ISymbolApiService
 
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                $"{_configuration["IEXCloudUrls:symbolUrl"]}" +
-               $"?token={_configuration["Token"]}";
+               $"?token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await httpClient.GetAsync(url);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new IexCloudException(response);
+        }
 
         return await response.Content.ReadAsAsync<List<SymbolInfo>>();
     }

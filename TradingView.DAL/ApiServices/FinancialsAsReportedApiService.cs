@@ -1,4 +1,5 @@
-﻿using Entites.StockFundamentals.FinancialsAsReported;
+﻿using Entites.Exceptions;
+using Entites.StockFundamentals.FinancialsAsReported;
 using Microsoft.Extensions.Configuration;
 using TradingView.DAL.Abstractions.ApiServices;
 
@@ -21,9 +22,13 @@ public class FinancialsAsReportedApiService : IFinancialsAsReportedApiService
 
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                $"{string.Format(_configuration["IEXCloudUrls:financialsAsReportedUrl"], symbol)}" +
-               $"?token={_configuration["Token"]}";
+               $"?token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await httpClient.GetAsync(url);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new IexCloudException(response);
+        }
 
         var financialsAsReportedItems = await response.Content.ReadAsAsync<List<FinancialsAsReportedItem>>();
 

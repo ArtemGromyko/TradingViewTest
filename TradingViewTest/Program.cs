@@ -1,7 +1,7 @@
 using Serilog;
 using TradingView.BLL.Services;
-using TradingView.DAL.Quartz;
 using TradingViewTest.Extensions;
+using TradingViewTest.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +19,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
+services.ConfigureCors();
 services.ConfigureRepositories();
 services.ConfigureServices();
 services.ConfigureApiServices();
@@ -32,11 +33,16 @@ services.AddScoped<GetAllService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+app.UseCors("CorsPolicy");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 

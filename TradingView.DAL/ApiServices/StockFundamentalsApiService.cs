@@ -1,4 +1,6 @@
-﻿using Entites.StockFundamentals;
+﻿using Entites;
+using Entites.Exceptions;
+using Entites.StockFundamentals;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using TradingView.DAL.Abstractions.ApiServices;
@@ -22,9 +24,14 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
 
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                 $"{string.Format(_configuration["IEXCloudUrls:stockFundamentalsUrl"], symbol)}" +
-                $"&token={_configuration["Token"]}";
+                $"&token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await httpClient.GetAsync(url);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new IexCloudException(response);
+        }
+
         var stringResult = await response.Content.ReadAsStringAsync();
 
         var jsonParsed = JObject.Parse(stringResult);

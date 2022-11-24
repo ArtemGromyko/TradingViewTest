@@ -1,18 +1,33 @@
 ﻿using TradingView.BLL.Abstractions;
+using TradingView.BLL.Abstractions.RealTime;
+using TradingView.BLL.Contracts;
 using TradingView.BLL.Services;
+using TradingView.BLL.Services.RealTime;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
+using TradingView.DAL.Abstractions.Repositories.RealTime;
 using TradingView.DAL.ApiServices;
 using TradingView.DAL.Quartz;
 using TradingView.DAL.Quartz.Jobs;
 using TradingView.DAL.Quartz.Schedulers;
+using TradingView.DAL.Quartz.Schedulers.RealTime;
 using TradingView.DAL.Repositories;
+using TradingView.DAL.Repositories.RealTime;
 using TradingView.DAL.Settings;
 
 namespace TradingViewTest.Extensions;
 
 public static class ServiceExtensions
 {
+    public static void ConfigureCors(this IServiceCollection services) =>
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+            });
+
     public static void ConfigureServices(this IServiceCollection services)
     {
         services.AddScoped<ISymbolService, SymbolService>();
@@ -26,6 +41,19 @@ public static class ServiceExtensions
         services.AddScoped<IStockProfileRepository, StockProfileRepository>();
         services.AddScoped<IStockFundamentalsRepository, StockFundamentalsRepository>();
         services.AddScoped<IFinancialsAsReportedRepository, FinancialsAsReportedRepository>();
+
+        services.AddScoped<IHistoricalPricesRepository, HistoricalPricesRepository>();
+        services.AddScoped<IQuotesRepository, QuotesRepository>();
+        services.AddScoped<IIntradayPricesRepository, IntradayPricesRepository>();
+        services.AddScoped<ILargestTradesRepository, LargestTradesRepository>();
+        services.AddScoped<IOHLCRepository, OHLCRepository>();
+        services.AddScoped<IPreviousDayPriceRepository, PreviousDayPriceRepository>();
+        services.AddScoped<IVolumeByVenueRepository, VolumeByVenueRepository>();
+        services.AddScoped<IBookRepository, BookRepository>();
+        services.AddScoped<IDelayedQuoteRepository, DelayedQuoteRepository>();
+        services.AddScoped<IPriceOnlyRepository, PriceOnlyRepository>();
+        services.AddScoped<IDividendsRepository, DividendsRepository>();
+        services.AddScoped<IExchangeRepository, ExchangeRepository>();
     }
 
     public static void ConfigureHttpClient(this IServiceCollection services, IConfiguration configuration) =>
@@ -46,6 +74,18 @@ public static class ServiceExtensions
         services.AddScoped<IStockProfileApiService, StockProfileApiService>();
         services.AddScoped<IStockFundamentalsApiService, StockFundamentalsApiService>();
         services.AddScoped<IFinancialsAsReportedApiService, FinancialsAsReportedApiService>();
+
+        services.AddScoped<IHistoricalPricesService, HistoricalPricesService>();
+        services.AddScoped<IQuotesService, QuotesService>();
+        services.AddScoped<IIntradayPricesService, IntradayPricesService>();
+        services.AddScoped<ILargestTradesService, LargestTradesService>();
+        services.AddScoped<IOHLCService, OHLCService>();
+        services.AddScoped<IPreviousDayPriceService, PreviousDayPriceService>();
+        services.AddScoped<IPriceOnlyService, PriceOnlyService>();
+        services.AddScoped<IVolumeByVenueService, VolumeByVenueService>();
+        services.AddScoped<IBookService, BookService>();
+        services.AddScoped<IDelayedQuoteService, DelayedQuoteService>();
+        services.AddScoped<IExchangeService, ExchangeService>();
     }
 
     public static void ConfigureJobs(this IServiceCollection services)
@@ -64,7 +104,17 @@ public static class ServiceExtensions
         try
         {
             //StockDataScheduler.Start(serviceProvider);
-            FinancialsAsReportedScheduler.Start(serviceProvider);
+            //FinancialsAsReportedScheduler.Start(serviceProvider);
+
+            BookScheduler.Start(serviceProvider);
+            DelayedQuoteScheduler.Start(serviceProvider);
+            LargestTradesScheduler.Start(serviceProvider);
+            OHLCScheduler.Start(serviceProvider);
+            QuotesScheduler.Start(serviceProvider);
+            VolumeByVenueScheduler.Start(serviceProvider);
+            IntradayPricesScheduler.Start(serviceProvider);
+            PriceOnlyScheduler.Start(serviceProvider);
+            PreviousDayPriceScheduler.Start(serviceProvider);
         }
         catch (Exception)
         {
