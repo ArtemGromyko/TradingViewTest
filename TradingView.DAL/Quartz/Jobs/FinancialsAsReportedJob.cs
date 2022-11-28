@@ -1,6 +1,8 @@
-﻿using Entites.StockFundamentals.FinancialsAsReported;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Entites;
+using Entites.StockFundamentals.FinancialsAsReported;
+using Microsoft.Extensions.Options;
 using Quartz;
+using System.Net;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
 
@@ -8,38 +10,33 @@ namespace TradingView.DAL.Quartz.Jobs;
 
 public class FinancialsAsReportedJob : IJob
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ISymbolApiService _symbolApiService;
+    private readonly IFinancialsAsReportedApiService _financialsAsReportedApiService;
 
-    public FinancialsAsReportedJob(IServiceScopeFactory serviceScopeFactory)
+    private readonly ISymbolRepository _symbolRepository;
+    private readonly IFinancialsAsReportedRepository _financialsAsReportedRepository;
+
+    private readonly IOptions<JobConfiguration> _jobConfiguration;
+
+    public FinancialsAsReportedJob(ISymbolApiService symbolApiService, IFinancialsAsReportedApiService financialsAsReportedApiService,
+        ISymbolRepository symbolRepository, IFinancialsAsReportedRepository financialsAsReportedRepository, IOptions<JobConfiguration> jobConfiguration)
     {
-        _serviceScopeFactory = serviceScopeFactory;
+        _symbolApiService = symbolApiService;
+        _financialsAsReportedApiService = financialsAsReportedApiService;
+        _symbolRepository = symbolRepository;
+        _financialsAsReportedRepository = financialsAsReportedRepository;
+        _jobConfiguration = jobConfiguration;
     }
 
-    public async Task Execute(IJobExecutionContext context)
+    public async Task<List<FinancialsAsReported>> ProcessFinancialsAsReportedAsync(List<string> symbolNames)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        var financialsAsReportedTasks = new List<Task<(FinancialsAsReported, ResponseDto)>>();
 
-        var symbolRepository = scope.ServiceProvider.GetService<ISymbolRepository>();
-        var financialsAsReportedRepository = scope.ServiceProvider.GetService<IFinancialsAsReportedRepository>();
+        var skip = _jobConfiguration.Value.Skip;
+        var take = _jobConfiguration.Value.Take;
+        var delay = _jobConfiguration.Value.Delay;
 
-        var symbolApiService = scope.ServiceProvider.GetService<ISymbolApiService>();
-        var financialsAsReportedApiService = scope.ServiceProvider.GetService<IFinancialsAsReportedApiService>();
-
-        var symbols = await symbolRepository.GetAllAsync();
-
-        if (symbols.Count == 0)
-        {
-            symbols = await symbolApiService.FetchSymbolsAsync();
-            await symbolRepository.AddCollectionAsync(symbols);
-        }
-
-        var symbolNames = symbols.Select(symbol => symbol.Symbol).Take(100).ToList();
-
-        var financialsAsReportedTasks = new List<Task<FinancialsAsReported>>();
-
-        var skip = 0;
-        var take = 5;
-        var delay = 1500;
+        var fetchDelay = _jobConfiguration.Value.FetchDelay;
 
         do
         {
@@ -47,20 +44,57 @@ public class FinancialsAsReportedJob : IJob
 
             foreach (var symbol in currentSymbols)
             {
-                var financialsAsReported = financialsAsReportedApiService.FetchFinancialsAsReportedAsync(symbol);
-                await Task.Delay(300);
+                var stockFundamentalsTask = _financialsAsReportedApiService.FetchFinancialsAsReportedAsync(symbol);
+                await Task.Delay(fetchDelay);
 
-                financialsAsReportedTasks.Add(financialsAsReported);
+                financialsAsReportedTasks.Add(stockFundamentalsTask);
             }
 
-            skip += 5;
+            skip += take;
 
             await Task.Delay(delay);
         }
-        while (skip < 100);
+        while (skip < symbolNames.Count);
 
-        var financialsAsReportedList = await Task.WhenAll(financialsAsReportedTasks);
+        var financialsAsReported = await Task.WhenAll(financialsAsReportedTasks);
 
-        await financialsAsReportedRepository.AddCollectionAsync(financialsAsReportedList);
+        var financialsAsReportedErrors = financialsAsReported
+            .Where((sf) => sf.Item2?.StatusCode == HttpStatusCode.TooManyRequests)
+            .Select((s) => s.Item2?.Symbol)
+            .ToList();
+
+        var financialsAsReportedSucceed = financialsAsReported
+            .Where((sp) => sp.Item2?.StatusCode == HttpStatusCode.OK)
+            .Select((s) => s.Item1)
+            .ToList();
+
+        if (financialsAsReportedErrors.Count != 0)
+        {
+            await Task.Delay(delay);
+            var newFinancialsAsReported = await ProcessFinancialsAsReportedAsync(financialsAsReportedErrors);
+
+            financialsAsReportedSucceed.AddRange(newFinancialsAsReported);
+        }
+
+        return financialsAsReportedSucceed;
+    }
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        await _financialsAsReportedRepository.DeleteAllAsync();
+
+        var symbols = await _symbolRepository.GetAllAsync();
+
+        if (symbols.Count == 0)
+        {
+            symbols = await _symbolApiService.FetchSymbolsAsync();
+            await _symbolRepository.AddCollectionAsync(symbols.Take(10));
+        }
+
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(10).ToList();
+
+        var financialsAsReportedList = await ProcessFinancialsAsReportedAsync(symbolNames);
+
+        await _financialsAsReportedRepository.AddCollectionAsync(financialsAsReportedList);
     }
 }

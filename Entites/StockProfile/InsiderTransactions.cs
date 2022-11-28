@@ -10,7 +10,7 @@ public class InsiderTransactions
     public string FilingDate { get; set; }
     public string FullName { get; set; }
     public bool? Is10b51 { get; set; }
-    public int? PostShares { get; set; }
+    public long? PostShares { get; set; }
     public string ReportedTitle { get; set; }
     public string SecAccessionNumber { get; set; }
     public string Symbol { get; set; }

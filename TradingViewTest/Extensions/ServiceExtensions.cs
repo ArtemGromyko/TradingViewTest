@@ -1,4 +1,5 @@
-﻿using TradingView.BLL.Abstractions;
+﻿using Entites;
+using TradingView.BLL.Abstractions;
 using TradingView.BLL.Abstractions.RealTime;
 using TradingView.BLL.Contracts;
 using TradingView.BLL.Services;
@@ -9,6 +10,7 @@ using TradingView.DAL.Abstractions.Repositories.RealTime;
 using TradingView.DAL.ApiServices;
 using TradingView.DAL.Quartz;
 using TradingView.DAL.Quartz.Jobs;
+using TradingView.DAL.Quartz.Jobs.RealTime;
 using TradingView.DAL.Quartz.Schedulers;
 using TradingView.DAL.Quartz.Schedulers.RealTime;
 using TradingView.DAL.Repositories;
@@ -37,10 +39,10 @@ public static class ServiceExtensions
 
     public static void ConfigureRepositories(this IServiceCollection services)
     {
-        services.AddScoped<ISymbolRepository, SymbolRepository>();
-        services.AddScoped<IStockProfileRepository, StockProfileRepository>();
-        services.AddScoped<IStockFundamentalsRepository, StockFundamentalsRepository>();
-        services.AddScoped<IFinancialsAsReportedRepository, FinancialsAsReportedRepository>();
+        services.AddTransient<ISymbolRepository, SymbolRepository>();
+        services.AddTransient<IStockProfileRepository, StockProfileRepository>();
+        services.AddTransient<IStockFundamentalsRepository, StockFundamentalsRepository>();
+        services.AddTransient<IFinancialsAsReportedRepository, FinancialsAsReportedRepository>();
 
         services.AddScoped<IHistoricalPricesRepository, HistoricalPricesRepository>();
         services.AddScoped<IQuotesRepository, QuotesRepository>();
@@ -68,12 +70,17 @@ public static class ServiceExtensions
             .GetSection("DatabaseSettings"));
     }
 
+    public static void ConfigureJobs(this IServiceCollection services, IConfiguration configuration) =>
+        services.Configure<JobConfiguration>(configuration
+            .GetSection("JobConfiguration"));
+        
+
     public static void ConfigureApiServices(this IServiceCollection services)
     {
-        services.AddScoped<ISymbolApiService, SymbolApiService>();
-        services.AddScoped<IStockProfileApiService, StockProfileApiService>();
-        services.AddScoped<IStockFundamentalsApiService, StockFundamentalsApiService>();
-        services.AddScoped<IFinancialsAsReportedApiService, FinancialsAsReportedApiService>();
+        services.AddTransient<ISymbolApiService, SymbolApiService>();
+        services.AddTransient<IStockProfileApiService, StockProfileApiService>();
+        services.AddTransient<IStockFundamentalsApiService, StockFundamentalsApiService>();
+        services.AddTransient<IFinancialsAsReportedApiService, FinancialsAsReportedApiService>();
 
         services.AddScoped<IHistoricalPricesService, HistoricalPricesService>();
         services.AddScoped<IQuotesService, QuotesService>();
@@ -94,6 +101,16 @@ public static class ServiceExtensions
 
         services.AddScoped<StockDataJob>();
         services.AddScoped<FinancialsAsReportedJob>();
+
+        services.AddScoped<BookJob>();
+        services.AddScoped<DelayedQuoteJob>();
+        services.AddScoped<IntradayPricesJob>();
+        services.AddScoped<LargestTradesJob>();
+        services.AddScoped<OHLCJob>();
+        services.AddScoped<PreviousDayPriceJob>();
+        services.AddScoped<PriceOnlyJob>();
+        services.AddScoped<QuotesJob>();
+        services.AddScoped<VolumeByVenueJob>();
     }
 
     public static void StartJobs(this WebApplication host)
@@ -103,8 +120,8 @@ public static class ServiceExtensions
         var serviceProvider = scope.ServiceProvider;
         try
         {
-            //StockDataScheduler.Start(serviceProvider);
-            //FinancialsAsReportedScheduler.Start(serviceProvider);
+            StockDataScheduler.Start(serviceProvider);
+            FinancialsAsReportedScheduler.Start(serviceProvider);
 
             BookScheduler.Start(serviceProvider);
             DelayedQuoteScheduler.Start(serviceProvider);

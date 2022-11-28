@@ -1,4 +1,5 @@
-﻿using Entites.StockProfile;
+﻿using Entites.Exceptions;
+using Entites.StockProfile;
 using TradingView.BLL.Abstractions;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
@@ -21,7 +22,10 @@ public class StockProfileService : IStockProfileService
         var stockProfile = await _stockProfileRepository.GetAsync(
             (s) => s.SymbolName.ToUpper() == symbol.ToUpper());
 
-        // var stockProfile = await _stockProfileApiService.FetchStockProfileAsync(symbol);
+        if (stockProfile is null)
+        {
+            throw new NotFoundException("Symbol not found");
+        }
 
         return stockProfile;
     }

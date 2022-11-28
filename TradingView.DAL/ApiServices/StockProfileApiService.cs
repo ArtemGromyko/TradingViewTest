@@ -1,5 +1,4 @@
 ﻿using Entites;
-using Entites.Exceptions;
 using Entites.StockProfile;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -19,18 +18,20 @@ public class StockProfileApiService : IStockProfileApiService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<StockProfile> FetchStockProfileAsync(string symbol)
+    public async Task<(StockProfile, ResponseDto)> FetchStockProfileAsync(string symbol)
     {
         var httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
-
+        var str = Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN");
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                 $"{string.Format(_configuration["IEXCloudUrls:stockProfileUrl"], symbol)}" +
                 $"&token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await httpClient.GetAsync(url);
+        var responseDto = new ResponseDto { StatusCode = response.StatusCode, Symbol = symbol };
+
         if (!response.IsSuccessStatusCode)
         {
-            throw new IexCloudException(response);
+            return (null, responseDto);
         }
 
         var stringResult = await response.Content.ReadAsStringAsync();
@@ -47,6 +48,6 @@ public class StockProfileApiService : IStockProfileApiService
 
         var stockProfile = new StockProfile { SymbolName = symbol, StockProfileItem = stockProfileItem };
 
-        return stockProfile;
+        return (stockProfile, responseDto);
     }
 }

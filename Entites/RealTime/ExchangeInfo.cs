@@ -1,6 +1,6 @@
 ﻿namespace Entites.RealTime;
 
-public class ExchangeInfo
+public class ExchangeInfo : EntityBase
 {
     public string Exchange { get; set; }
     public string Region { get; set; }

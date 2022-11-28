@@ -1,6 +1,8 @@
-﻿using Entites.Exceptions;
+﻿using Entites;
+using Entites.Exceptions;
 using Entites.StockFundamentals.FinancialsAsReported;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 using TradingView.DAL.Abstractions.ApiServices;
 
 namespace TradingView.DAL.ApiServices;
@@ -16,7 +18,7 @@ public class FinancialsAsReportedApiService : IFinancialsAsReportedApiService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<FinancialsAsReported> FetchFinancialsAsReportedAsync(string symbol)
+    public async Task<(FinancialsAsReported, ResponseDto)> FetchFinancialsAsReportedAsync(string symbol)
     {
         var httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
 
@@ -25,13 +27,17 @@ public class FinancialsAsReportedApiService : IFinancialsAsReportedApiService
                $"?token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await httpClient.GetAsync(url);
+        var respnseDto = new ResponseDto { StatusCode = HttpStatusCode.OK, Symbol = symbol };
+        var financialsAsreported = new FinancialsAsReported { Symbol = symbol };
+
         if (!response.IsSuccessStatusCode)
         {
-            throw new IexCloudException(response);
+            return (financialsAsreported, respnseDto);
         }
 
         var financialsAsReportedItems = await response.Content.ReadAsAsync<List<FinancialsAsReportedItem>>();
+        financialsAsreported.FinancialsAsReportedItems = financialsAsReportedItems;
 
-        return new FinancialsAsReported { Symbol = symbol, FinancialsAsReportedItems = financialsAsReportedItems };
+        return (financialsAsreported, respnseDto);
     }
 }

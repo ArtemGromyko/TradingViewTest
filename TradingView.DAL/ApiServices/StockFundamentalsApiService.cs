@@ -1,5 +1,4 @@
 ﻿using Entites;
-using Entites.Exceptions;
 using Entites.StockFundamentals;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -18,7 +17,7 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<StockFundamentals> FetchStockFundamentalsAsync(string symbol)
+    public async Task<(StockFundamentals, ResponseDto)> FetchStockFundamentalsAsync(string symbol)
     {
         var httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
 
@@ -27,9 +26,11 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
                 $"&token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await httpClient.GetAsync(url);
+        var responseDto = new ResponseDto { StatusCode = response.StatusCode, Symbol = symbol };
+
         if (!response.IsSuccessStatusCode)
         {
-            throw new IexCloudException(response);
+            return (null, responseDto);
         }
 
         var stringResult = await response.Content.ReadAsStringAsync();
@@ -46,6 +47,6 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
 
         var stockFundamentals = new StockFundamentals { SymbolName = symbol, StockFundamentalsItem = stockFundamentalsItem };
 
-        return stockFundamentals;
+        return (stockFundamentals, responseDto);
     }
 } 

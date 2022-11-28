@@ -1,6 +1,7 @@
 ﻿using Entites.RealTime;
 using Microsoft.AspNetCore.Mvc;
 using TradingView.BLL.Abstractions.RealTime;
+using TradingView.BLL.Contracts;
 
 namespace TradingViewTest.Controllers;
 
@@ -18,11 +19,12 @@ public class RealTimeDataController : ControllerBase
     private readonly IVolumeByVenueService _volumeByVenueService;
     private readonly IBookService _bookService;
     private readonly IDelayedQuoteService _delayedQuoteService;
+    private readonly IExchangeService _exchangeService;
 
     public RealTimeDataController(IHistoricalPricesService historicalPricesService, IQuotesService quotesService,
         IIntradayPricesService intradayPricesService, ILargestTradesService largestTradesService, IOHLCService ohlcService,
         IPreviousDayPriceService previousDayPriceService, IPriceOnlyService priceOnlyService, IVolumeByVenueService volumeByVenueService,
-        IBookService bookService, IDelayedQuoteService delayedQuoteService)
+        IBookService bookService, IDelayedQuoteService delayedQuoteService, IExchangeService exchangeService)
     {
         _historicalPricesService = historicalPricesService;
         _quotesService = quotesService;
@@ -34,6 +36,7 @@ public class RealTimeDataController : ControllerBase
         _volumeByVenueService = volumeByVenueService;
         _bookService = bookService;
         _delayedQuoteService = delayedQuoteService;
+        _exchangeService = exchangeService;
     }
 
     [HttpGet("{symbol}/historical-prices")]
@@ -119,13 +122,8 @@ public class RealTimeDataController : ControllerBase
     [HttpGet("exchanges")]
     public async Task<IActionResult> GetAllExchanges()
     {
-        using var client = new HttpClient();
+        var exchanges = await _exchangeService.GetExchangesAsync();
 
-        var response = await client
-            .GetAsync($"https://sandbox.iexapis.com/stable/ref-data/exchanges?token=Tpk_aae23baa9af74779993006fb85d15f0f");
-
-        var res = await response.Content.ReadAsAsync<IEnumerable<ExchangeInfo>>();
-
-        return Ok(res);
+        return Ok(exchanges);
     }
 }

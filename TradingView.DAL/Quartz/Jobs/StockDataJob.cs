@@ -1,7 +1,9 @@
-﻿using Entites.StockFundamentals;
+﻿using Entites;
+using Entites.StockFundamentals;
 using Entites.StockProfile;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Quartz;
+using System.Net;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
 
@@ -9,41 +11,38 @@ namespace TradingView.DAL.Quartz.Jobs;
 
 public class StockDataJob : IJob
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IStockProfileApiService _stockProfileApiService;
+    private readonly IStockFundamentalsApiService _stockFundamentalsApiService;
+    private readonly ISymbolApiService _symbolApiService;
 
-    public StockDataJob(IServiceScopeFactory serviceScopeFactory)
+    private readonly IStockProfileRepository _stockProfileRepository;
+    private readonly IStockFundamentalsRepository _stockFundamentalsRepository;
+    private readonly ISymbolRepository _symbolRepository;
+
+    private readonly IOptions<JobConfiguration> _jobConfiguration;
+
+    public StockDataJob(IStockProfileApiService stockProfileApiService, IStockFundamentalsApiService stockFundamentalsApiService,
+        ISymbolApiService symbolApiService, IStockProfileRepository stockProfileRepository, IStockFundamentalsRepository stockFundamentalsRepository,
+        ISymbolRepository symbolRepository, IOptions<JobConfiguration> jobConfiguration)
     {
-        _serviceScopeFactory = serviceScopeFactory;
+        _stockProfileApiService = stockProfileApiService;
+        _stockFundamentalsApiService = stockFundamentalsApiService;
+        _symbolApiService = symbolApiService;
+        _stockProfileRepository = stockProfileRepository;
+        _stockFundamentalsRepository = stockFundamentalsRepository;
+        _symbolRepository = symbolRepository;
+        _jobConfiguration = jobConfiguration;
     }
 
-    public async Task Execute(IJobExecutionContext context)
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
+    public async Task<List<StockProfile>> ProcessStockProfileAsync(List<string> symbolNames)
+      {
+        var stockProfileTasks = new List<Task<(StockProfile, ResponseDto)>>();
 
-        var symbolRepository = scope.ServiceProvider.GetService<ISymbolRepository>();
-        var stockProfileRepository = scope.ServiceProvider.GetService<IStockProfileRepository>();
-        var stockFundamentalsRepository = scope.ServiceProvider.GetService<IStockFundamentalsRepository>();
+        var skip = _jobConfiguration.Value.Skip;
+        var take = _jobConfiguration.Value.Take;
+        var delay = _jobConfiguration.Value.Delay;
 
-        var symbolApiService = scope.ServiceProvider.GetService<ISymbolApiService>();
-        var stockProfileApiService = scope.ServiceProvider.GetService<IStockProfileApiService>();
-        var stockFundamentalsApiService = scope.ServiceProvider.GetService<IStockFundamentalsApiService>();
-
-        await symbolRepository.DeleteAllAsync();
-        await stockProfileRepository.DeleteAllAsync();
-        await stockFundamentalsRepository.DeleteAllAsync();
-
-        var symbols = await symbolApiService.FetchSymbolsAsync();
-
-        await symbolRepository.AddCollectionAsync(symbols.Take(100));
-
-        var symbolNames = symbols.Select(symbol => symbol.Symbol).Take(100).ToList();
-
-        var stockProfileTasks = new List<Task<StockProfile>>();
-        var stockFundamentalsTasks = new List<Task<StockFundamentals>>();
-
-        var skip = 0;
-        var take = 5;
-        var delay = 1500;
+        var fetchDelay = _jobConfiguration.Value.FetchDelay;
 
         do
         {
@@ -51,27 +50,106 @@ public class StockDataJob : IJob
 
             foreach (var symbol in currentSymbols)
             {
-                var stockProfileTask = stockProfileApiService.FetchStockProfileAsync(symbol);
-                await Task.Delay(250);
-                var stockFundamentalsTask = stockFundamentalsApiService.FetchStockFundamentalsAsync(symbol);
-                await Task.Delay(250);
+                var stockProfileTask = _stockProfileApiService.FetchStockProfileAsync(symbol);
+                await Task.Delay(fetchDelay);
 
-                stockFundamentalsTasks.Add(stockFundamentalsTask);
                 stockProfileTasks.Add(stockProfileTask);
             }
 
-            skip += 5;
+            skip += take;
 
             await Task.Delay(delay);
-
-            //delay += 100;
         }
-        while (skip < 100);
+        while (skip < symbolNames.Count);
 
         var stockProfiles = await Task.WhenAll(stockProfileTasks);
+
+        var stockProfileSymbolsErrors = stockProfiles
+            .Where((sp) => sp.Item2?.StatusCode == HttpStatusCode.TooManyRequests)
+            .Select((s) => s.Item2?.Symbol)
+            .ToList();
+
+        var stockProfilesSucced = stockProfiles
+            .Where((sp) => sp.Item2?.StatusCode == HttpStatusCode.OK)
+            .Select((s) => s.Item1)
+            .ToList();
+
+        if (stockProfileSymbolsErrors.Count != 0)
+        {
+            await Task.Delay(delay);
+            var newStockProfiles = await ProcessStockProfileAsync(stockProfileSymbolsErrors);
+
+            stockProfilesSucced.AddRange(newStockProfiles);
+        }
+
+        return stockProfilesSucced;
+    }
+
+    public async Task<List<StockFundamentals>> ProcessStockfundamentalsAsync(List<string> symbolNames)
+    {
+        var stockFundamentalsTasks = new List<Task<(StockFundamentals, ResponseDto)>>();
+
+        var skip = _jobConfiguration.Value.Skip;
+        var take = _jobConfiguration.Value.Take;
+        var delay = _jobConfiguration.Value.Delay;
+
+        var fetchDelay = _jobConfiguration.Value.FetchDelay;
+
+        do
+        {
+            var currentSymbols = symbolNames.Skip(skip).Take(take).ToList();
+
+            foreach (var symbol in currentSymbols)
+            {
+                var stockFundamentalsTask = _stockFundamentalsApiService.FetchStockFundamentalsAsync(symbol);
+                await Task.Delay(fetchDelay);
+
+                stockFundamentalsTasks.Add(stockFundamentalsTask);
+            }
+
+            skip += take;
+
+            await Task.Delay(delay);
+        }
+        while (skip < symbolNames.Count);
+
         var stockFundamentals = await Task.WhenAll(stockFundamentalsTasks);
 
-        await stockProfileRepository.AddCollectionAsync(stockProfiles);
-        await stockFundamentalsRepository.AddCollectionAsync(stockFundamentals);
+        var stockFundamentalsSymbolsErrors = stockFundamentals
+            .Where((sf) => sf.Item2?.StatusCode == HttpStatusCode.TooManyRequests)
+            .Select((s) => s.Item2?.Symbol)
+            .ToList();
+
+        var stockFundamentalsSucceed = stockFundamentals
+            .Where((sp) => sp.Item2?.StatusCode == HttpStatusCode.OK)
+            .Select((s) => s.Item1)
+            .ToList();
+
+        if (stockFundamentalsSymbolsErrors.Count != 0)
+        {
+            await Task.Delay(delay);
+            var stockFundamentalsRes = await ProcessStockfundamentalsAsync(stockFundamentalsSymbolsErrors);
+
+            stockFundamentalsSucceed.AddRange(stockFundamentalsRes);
+        }
+
+        return stockFundamentalsSucceed;
+    }
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        await Task.WhenAll(_symbolRepository.DeleteAllAsync(), _stockProfileRepository.DeleteAllAsync(), _stockFundamentalsRepository.DeleteAllAsync());
+
+        var symbols = await _symbolApiService.FetchSymbolsAsync();
+
+        await _symbolRepository.AddCollectionAsync(symbols.Take(10));
+
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(10).ToList();
+
+        var stockProfiles = await ProcessStockProfileAsync(symbolNames);
+        var stockFundamentals = await ProcessStockfundamentalsAsync(symbolNames);
+
+        await _stockProfileRepository.AddCollectionAsync(stockProfiles);
+        await _stockFundamentalsRepository.AddCollectionAsync(stockFundamentals);
     }
 }

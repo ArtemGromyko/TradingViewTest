@@ -16,9 +16,10 @@ public class FinancialsAsReportedScheduler
         IJobDetail job = JobBuilder.Create<FinancialsAsReportedJob>()
             .Build();
 
+        // 0 0 0,18 ? *MON,TUE,WED,THU,FRI*
         ITrigger trigger = TriggerBuilder.Create()
             .WithIdentity("FinancialsAsReportedTrigger", "default")
-            .WithCronSchedule("0 */3 * ? * *", x => x.InTimeZone(TimeZoneInfo.Utc)) //Updates at 4am and 5am UTC every day
+            .WithCronSchedule("0 35 13 ? * MON,TUE,WED,THU,FRI *", x => x.InTimeZone(TimeZoneInfo.Utc)) //Updates at 4am and 5am UTC every day
             .Build();
 
         await scheduler.ScheduleJob(job, trigger);

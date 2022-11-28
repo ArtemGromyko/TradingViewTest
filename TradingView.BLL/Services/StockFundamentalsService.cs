@@ -1,4 +1,5 @@
-﻿using Entites.StockFundamentals;
+﻿using Entites.Exceptions;
+using Entites.StockFundamentals;
 using TradingView.BLL.Abstractions;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
@@ -10,12 +11,9 @@ public class StockFundamentalsService : IStockFundamentalsService
     private readonly IStockFundamentalsRepository _stockFundamentalsRepository;
     private readonly IFinancialsAsReportedRepository _financialsAsReportedRepository;
 
-    private readonly IStockFundamentalsApiService _stockFundamentalsApiService;
-
-    public StockFundamentalsService(IStockFundamentalsRepository stockFundamentalsRepository, IStockFundamentalsApiService stockFundamentalsApiService, IFinancialsAsReportedRepository financialsAsReportedRepository)
+    public StockFundamentalsService(IStockFundamentalsRepository stockFundamentalsRepository, IFinancialsAsReportedRepository financialsAsReportedRepository)
     {
         _stockFundamentalsRepository = stockFundamentalsRepository;
-        _stockFundamentalsApiService = stockFundamentalsApiService;
         _financialsAsReportedRepository = financialsAsReportedRepository;
     }
 
@@ -24,12 +22,15 @@ public class StockFundamentalsService : IStockFundamentalsService
         var stockFundamentals = await _stockFundamentalsRepository.GetAsync(
             (s) => s.SymbolName.ToUpper() == symbol.ToUpper());
 
+        if (stockFundamentals is null)
+        {
+            throw new NotFoundException("Symbol not found");
+        }
+
         var financialsAsReported = await _financialsAsReportedRepository.GetAsync(
             (s) => s.Symbol.ToUpper() == symbol.ToUpper());
 
-        stockFundamentals.StockFundamentalsItem.FinancialsAsReported = financialsAsReported.FinancialsAsReportedItems;
-
-        //var stockFundamentals = await _stockFundamentalsApiService.FetchStockFundamentalsAsync(symbol);
+        stockFundamentals.StockFundamentalsItem.FinancialsAsReported = financialsAsReported?.FinancialsAsReportedItems;
 
         return stockFundamentals;
     }

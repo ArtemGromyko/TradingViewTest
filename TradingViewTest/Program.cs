@@ -1,5 +1,4 @@
 using Serilog;
-using TradingView.BLL.Services;
 using TradingViewTest.Extensions;
 using TradingViewTest.Middlewares;
 
@@ -25,10 +24,9 @@ services.ConfigureServices();
 services.ConfigureApiServices();
 services.ConfigureHttpClient(configuration);
 services.ConfigureMongoDBConnection(configuration);
+services.ConfigureJobs(configuration);
 
 services.ConfigureJobs();
-
-services.AddScoped<GetAllService>();
 
 var app = builder.Build();
 

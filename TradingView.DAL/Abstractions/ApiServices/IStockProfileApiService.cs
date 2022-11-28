@@ -1,8 +1,9 @@
-﻿using Entites.StockProfile;
+﻿using Entites;
+using Entites.StockProfile;
 
 namespace TradingView.DAL.Abstractions.ApiServices;
 
 public interface IStockProfileApiService
 {
-    Task<StockProfile> FetchStockProfileAsync(string symbol);
+    Task<(StockProfile, ResponseDto)> FetchStockProfileAsync(string symbol);
 }
