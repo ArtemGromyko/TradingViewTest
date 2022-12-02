@@ -10,22 +10,23 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
 {
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
 
     public StockFundamentalsApiService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;
+
+        _httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
     }
 
     public async Task<(StockFundamentals, ResponseDto)> FetchStockFundamentalsAsync(string symbol)
     {
-        var httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
-
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                 $"{string.Format(_configuration["IEXCloudUrls:stockFundamentalsUrl"], symbol)}" +
                 $"&token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
-        var response = await httpClient.GetAsync(url);
+        var response = await _httpClient.GetAsync(url);
         var responseDto = new ResponseDto { StatusCode = response.StatusCode, Symbol = symbol };
 
         if (!response.IsSuccessStatusCode)

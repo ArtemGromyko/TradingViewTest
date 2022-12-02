@@ -2,6 +2,7 @@
 using Entites.StockFundamentals.FinancialsAsReported;
 using Microsoft.Extensions.Options;
 using Quartz;
+using Serilog;
 using System.Net;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
@@ -81,20 +82,22 @@ public class FinancialsAsReportedJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        await _financialsAsReportedRepository.DeleteAllAsync();
-
         var symbols = await _symbolRepository.GetAllAsync();
 
         if (symbols.Count == 0)
         {
             symbols = await _symbolApiService.FetchSymbolsAsync();
-            await _symbolRepository.AddCollectionAsync(symbols.Take(10));
+            await _symbolRepository.AddCollectionAsync(symbols);
         }
 
-        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(10).ToList();
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).ToList();
 
         var financialsAsReportedList = await ProcessFinancialsAsReportedAsync(symbolNames);
 
+        await _financialsAsReportedRepository.DeleteAllAsync();
+
         await _financialsAsReportedRepository.AddCollectionAsync(financialsAsReportedList);
+
+        Log.Information("Done!");
     }
 }

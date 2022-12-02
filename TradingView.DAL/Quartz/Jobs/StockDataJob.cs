@@ -3,6 +3,7 @@ using Entites.StockFundamentals;
 using Entites.StockProfile;
 using Microsoft.Extensions.Options;
 using Quartz;
+using Serilog;
 using System.Net;
 using TradingView.DAL.Abstractions.ApiServices;
 using TradingView.DAL.Abstractions.Repositories;
@@ -138,18 +139,22 @@ public class StockDataJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        await Task.WhenAll(_symbolRepository.DeleteAllAsync(), _stockProfileRepository.DeleteAllAsync(), _stockFundamentalsRepository.DeleteAllAsync());
+        await _symbolRepository.DeleteAllAsync();
 
         var symbols = await _symbolApiService.FetchSymbolsAsync();
 
-        await _symbolRepository.AddCollectionAsync(symbols.Take(10));
+        await _symbolRepository.AddCollectionAsync(symbols);
 
-        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(10).ToList();
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).ToList();
 
         var stockProfiles = await ProcessStockProfileAsync(symbolNames);
         var stockFundamentals = await ProcessStockfundamentalsAsync(symbolNames);
 
+        await Task.WhenAll(_stockProfileRepository.DeleteAllAsync(), _stockFundamentalsRepository.DeleteAllAsync());
+
         await _stockProfileRepository.AddCollectionAsync(stockProfiles);
         await _stockFundamentalsRepository.AddCollectionAsync(stockFundamentals);
+
+        Log.Information("Done!");
     }
 }
