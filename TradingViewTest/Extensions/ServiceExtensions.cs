@@ -120,7 +120,7 @@ public static class ServiceExtensions
         var serviceProvider = scope.ServiceProvider;
         try
         {
-            //StockDataScheduler.Start(serviceProvider);
+            StockDataScheduler.Start(serviceProvider);
             //FinancialsAsReportedScheduler.Start(serviceProvider);
 
             BookScheduler.Start(serviceProvider);

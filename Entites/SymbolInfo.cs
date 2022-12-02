@@ -3,6 +3,7 @@
 public class SymbolInfo : EntityBase
 {
     public string Symbol { get; set; }
+    public string Logo { get; set; }
     public string Exchange { get; set; }
     public string ExchangeSuffix { get; set; }
     public string ExchangeName { get; set; }

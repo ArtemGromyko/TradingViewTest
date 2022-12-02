@@ -18,7 +18,7 @@ public class StockDataScheduler
 
         ITrigger trigger = TriggerBuilder.Create()
             .WithIdentity("StockDataTrigger", "default")
-            .WithCronSchedule("0 10 21 ? * MON,TUE,WED,THU,FRI *", x => x.InTimeZone(TimeZoneInfo.Utc)) //Updates at 4am and 5am UTC every day
+            .WithCronSchedule("0 41 15 ? * MON,TUE,WED,THU,FRI *", x => x.InTimeZone(TimeZoneInfo.Utc)) //Updates at 4am and 5am UTC every day
             .Build();
 
         await scheduler.ScheduleJob(job, trigger);

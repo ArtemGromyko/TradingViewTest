@@ -22,14 +22,14 @@ public class StockProfileApiService : IStockProfileApiService
         _httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
     }
 
-    public async Task<(StockProfile, ResponseDto)> FetchStockProfileAsync(string symbol)
+    public async Task<(StockProfile, ResponseDto)> FetchStockProfileAsync(SymbolInfo symbol)
     { 
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
-                $"{string.Format(_configuration["IEXCloudUrls:stockProfileUrl"], symbol)}" +
+                $"{string.Format(_configuration["IEXCloudUrls:stockProfileUrl"], symbol.Symbol)}" +
                 $"&token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
         var response = await _httpClient.GetAsync(url);
-        var responseDto = new ResponseDto { StatusCode = response.StatusCode, Symbol = symbol };
+        var responseDto = new ResponseDto { StatusCode = response.StatusCode, Symbol = symbol.Symbol };
 
         if (!response.IsSuccessStatusCode)
         {
@@ -39,16 +39,18 @@ public class StockProfileApiService : IStockProfileApiService
         var stringResult = await response.Content.ReadAsStringAsync();
 
         var jsonParsed = JObject.Parse(stringResult);
-        var item = jsonParsed[$"{symbol.ToUpper()}"];
+        var item = jsonParsed[$"{symbol.Symbol.ToUpper()}"];
 
         StockProfileItem stockProfileItem = null;
 
         if (item != null && item.Type != JTokenType.Null)
         {
-            stockProfileItem = jsonParsed[$"{symbol.ToUpper()}"].ToObject<StockProfileItem>();
+            stockProfileItem = jsonParsed[$"{symbol.Symbol.ToUpper()}"].ToObject<StockProfileItem>();
         }
 
-        var stockProfile = new StockProfile { SymbolName = symbol, StockProfileItem = stockProfileItem };
+        var stockProfile = new StockProfile { SymbolName = symbol.Symbol.ToUpper(), StockProfileItem = stockProfileItem };
+
+        symbol.Logo = stockProfile?.StockProfileItem?.Logo?.Url;
 
         return (stockProfile, responseDto);
     }

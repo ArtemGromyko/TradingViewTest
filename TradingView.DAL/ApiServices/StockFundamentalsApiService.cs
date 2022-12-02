@@ -46,7 +46,7 @@ public class StockFundamentalsApiService : IStockFundamentalsApiService
             stockFundamentalsItem = jsonParsed[$"{symbol.ToUpper()}"].ToObject<StockFundamentalsItem>();
         }
 
-        var stockFundamentals = new StockFundamentals { SymbolName = symbol, StockFundamentalsItem = stockFundamentalsItem };
+        var stockFundamentals = new StockFundamentals { SymbolName = symbol.ToUpper(), StockFundamentalsItem = stockFundamentalsItem };
 
         return (stockFundamentals, responseDto);
     }

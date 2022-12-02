@@ -35,7 +35,7 @@ public class StockDataJob : IJob
         _jobConfiguration = jobConfiguration;
     }
 
-    public async Task<List<StockProfile>> ProcessStockProfileAsync(List<string> symbolNames)
+    public async Task<List<StockProfile>> ProcessStockProfileAsync(List<SymbolInfo> symbols)
       {
         var stockProfileTasks = new List<Task<(StockProfile, ResponseDto)>>();
 
@@ -47,7 +47,7 @@ public class StockDataJob : IJob
 
         do
         {
-            var currentSymbols = symbolNames.Skip(skip).Take(take).ToList();
+            var currentSymbols = symbols.Skip(skip).Take(take).ToList();
 
             foreach (var symbol in currentSymbols)
             {
@@ -61,14 +61,16 @@ public class StockDataJob : IJob
 
             await Task.Delay(delay);
         }
-        while (skip < symbolNames.Count);
+        while (skip < symbols.Count);
 
         var stockProfiles = await Task.WhenAll(stockProfileTasks);
 
         var stockProfileSymbolsErrors = stockProfiles
             .Where((sp) => sp.Item2?.StatusCode == HttpStatusCode.TooManyRequests)
             .Select((s) => s.Item2?.Symbol)
-            .ToList();
+            .ToHashSet();
+
+        var symbolsWithErrors = symbols.Where((symbol) => stockProfileSymbolsErrors.Contains(symbol.Symbol)).ToList();
 
         var stockProfilesSucced = stockProfiles
             .Where((sp) => sp.Item2?.StatusCode == HttpStatusCode.OK)
@@ -78,7 +80,7 @@ public class StockDataJob : IJob
         if (stockProfileSymbolsErrors.Count != 0)
         {
             await Task.Delay(delay);
-            var newStockProfiles = await ProcessStockProfileAsync(stockProfileSymbolsErrors);
+            var newStockProfiles = await ProcessStockProfileAsync(symbolsWithErrors);
 
             stockProfilesSucced.AddRange(newStockProfiles);
         }
@@ -143,15 +145,14 @@ public class StockDataJob : IJob
 
         var symbols = await _symbolApiService.FetchSymbolsAsync();
 
-        await _symbolRepository.AddCollectionAsync(symbols);
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(50).ToList();
 
-        var symbolNames = symbols.Select((symbol) => symbol.Symbol).ToList();
-
-        var stockProfiles = await ProcessStockProfileAsync(symbolNames);
+        var stockProfiles = await ProcessStockProfileAsync(symbols.Take(50).ToList());
         var stockFundamentals = await ProcessStockfundamentalsAsync(symbolNames);
 
         await Task.WhenAll(_stockProfileRepository.DeleteAllAsync(), _stockFundamentalsRepository.DeleteAllAsync());
 
+        await _symbolRepository.AddCollectionAsync(symbols.Take(50));
         await _stockProfileRepository.AddCollectionAsync(stockProfiles);
         await _stockFundamentalsRepository.AddCollectionAsync(stockFundamentals);
 

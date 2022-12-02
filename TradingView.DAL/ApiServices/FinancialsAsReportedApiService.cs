@@ -29,7 +29,7 @@ public class FinancialsAsReportedApiService : IFinancialsAsReportedApiService
 
         var response = await _httpClient.GetAsync(url);
         var respnseDto = new ResponseDto { StatusCode = HttpStatusCode.OK, Symbol = symbol };
-        var financialsAsreported = new FinancialsAsReported { Symbol = symbol };
+        var financialsAsreported = new FinancialsAsReported { Symbol = symbol.ToUpper() };
 
         if (!response.IsSuccessStatusCode)
         {

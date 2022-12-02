@@ -5,5 +5,5 @@ namespace TradingView.DAL.Abstractions.ApiServices;
 
 public interface IStockProfileApiService
 {
-    Task<(StockProfile, ResponseDto)> FetchStockProfileAsync(string symbol);
+    Task<(StockProfile, ResponseDto)> FetchStockProfileAsync(SymbolInfo symbol);
 }
