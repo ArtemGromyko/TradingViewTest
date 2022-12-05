@@ -87,10 +87,10 @@ public class FinancialsAsReportedJob : IJob
         if (symbols.Count == 0)
         {
             symbols = await _symbolApiService.FetchSymbolsAsync();
-            await _symbolRepository.AddCollectionAsync(symbols.Take(50));
+            await _symbolRepository.AddCollectionAsync(symbols);
         }
 
-        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(50).ToList();
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).ToList();
 
         var financialsAsReportedList = await ProcessFinancialsAsReportedAsync(symbolNames);
 

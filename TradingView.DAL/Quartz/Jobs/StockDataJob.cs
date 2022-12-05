@@ -145,16 +145,14 @@ public class StockDataJob : IJob
 
         var symbols = await _symbolApiService.FetchSymbolsAsync();
 
-        var symbolNames = symbols.Select((symbol) => symbol.Symbol).Take(50).ToList();
+        var symbolNames = symbols.Select((symbol) => symbol.Symbol).ToList();
 
-        var stockProfiles = await ProcessStockProfileAsync(symbols.Take(50).ToList());
+        var stockProfiles = await ProcessStockProfileAsync(symbols);
         var stockFundamentals = await ProcessStockfundamentalsAsync(symbolNames);
 
         await Task.WhenAll(_stockProfileRepository.DeleteAllAsync(), _stockFundamentalsRepository.DeleteAllAsync());
 
-        await _symbolRepository.AddCollectionAsync(symbols.Take(50));
-        await _stockProfileRepository.AddCollectionAsync(stockProfiles);
-        await _stockFundamentalsRepository.AddCollectionAsync(stockFundamentals);
+        await Task.WhenAll(_symbolRepository.AddCollectionAsync(symbols), _stockProfileRepository.AddCollectionAsync(stockProfiles), _stockFundamentalsRepository.AddCollectionAsync(stockFundamentals));
 
         Log.Information("Done!");
     }

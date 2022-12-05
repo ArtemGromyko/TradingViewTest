@@ -46,6 +46,8 @@ public class HistoricalPricesService : IHistoricalPricesService
             await _historicalPricesRepository.AddAsync(historicalPrice);
         }
 
+        return historicalPrice.Items;
+
         var lastPrice = historicalPrice.Items[^1];
         var date = Convert.ToDateTime(lastPrice.Date);
         var currentDate = DateTime.Today;
@@ -78,6 +80,7 @@ public class HistoricalPricesService : IHistoricalPricesService
                 range = "1y";
             }
 
+            await Task.Delay(3000);
             var url = $"{_configuration["IEXCloudUrls:version"]}" +
                $"{string.Format(_configuration["IEXCloudUrls:historicalPricesUrl"], symbol, range)}" +
                $"?token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";

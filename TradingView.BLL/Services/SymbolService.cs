@@ -25,7 +25,7 @@ public class SymbolService : ISymbolService
         {
             symbols = await _symbolApiService.FetchSymbolsAsync();
 
-            await _symbolRepository.AddCollectionAsync(symbols.Take(100));
+            await _symbolRepository.AddCollectionAsync(symbols);
         }
 
         return symbols;

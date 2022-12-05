@@ -11,23 +11,22 @@ public class FinancialsAsReportedApiService : IFinancialsAsReportedApiService
 {
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly HttpClient _httpClient;
 
     public FinancialsAsReportedApiService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;
-
-        _httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
     }
 
     public async Task<(FinancialsAsReported, ResponseDto)> FetchFinancialsAsReportedAsync(string symbol)
     {
+        var httpClient = _httpClientFactory.CreateClient(_configuration["HttpClientName"]);
+
         var url = $"{_configuration["IEXCloudUrls:version"]}" +
                $"{string.Format(_configuration["IEXCloudUrls:financialsAsReportedUrl"], symbol)}" +
                $"?token={Environment.GetEnvironmentVariable("PUBLISHABLE_TOKEN")}";
 
-        var response = await _httpClient.GetAsync(url);
+        var response = await httpClient.GetAsync(url);
         var respnseDto = new ResponseDto { StatusCode = HttpStatusCode.OK, Symbol = symbol };
         var financialsAsreported = new FinancialsAsReported { Symbol = symbol.ToUpper() };
 

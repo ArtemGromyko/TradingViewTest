@@ -62,6 +62,10 @@ public static class ServiceExtensions
         services.AddHttpClient(configuration["HttpClientName"], client =>
         {
             client.BaseAddress = new Uri(configuration["IEXCloudUrls:baseUrl"]);
+        }).ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
+
         });
 
     public static void ConfigureMongoDBConnection(this IServiceCollection services, IConfiguration configuration)
@@ -120,7 +124,7 @@ public static class ServiceExtensions
         var serviceProvider = scope.ServiceProvider;
         try
         {
-            StockDataScheduler.Start(serviceProvider);
+            //StockDataScheduler.Start(serviceProvider);
             //FinancialsAsReportedScheduler.Start(serviceProvider);
 
             BookScheduler.Start(serviceProvider);
