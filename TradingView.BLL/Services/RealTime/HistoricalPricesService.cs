@@ -46,14 +46,12 @@ public class HistoricalPricesService : IHistoricalPricesService
             await _historicalPricesRepository.AddAsync(historicalPrice);
         }
 
-        return historicalPrice.Items;
-
         var lastPrice = historicalPrice.Items[^1];
         var date = Convert.ToDateTime(lastPrice.Date);
         var currentDate = DateTime.Today;
         var previousDate = currentDate.AddDays(-1);
 
-        if (!date.Equals(previousDate))
+        if (!date.Equals(previousDate) && currentDate.DayOfWeek != DayOfWeek.Monday)
         {
             var range = "5d";
 
