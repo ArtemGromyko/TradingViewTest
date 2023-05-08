@@ -20,11 +20,12 @@ public class RealTimeDataController : ControllerBase
     private readonly IBookService _bookService;
     private readonly IDelayedQuoteService _delayedQuoteService;
     private readonly IExchangeService _exchangeService;
+    private readonly IRealTimeService _realTimeService;
 
     public RealTimeDataController(IHistoricalPricesService historicalPricesService, IQuotesService quotesService,
         IIntradayPricesService intradayPricesService, ILargestTradesService largestTradesService, IOHLCService ohlcService,
         IPreviousDayPriceService previousDayPriceService, IPriceOnlyService priceOnlyService, IVolumeByVenueService volumeByVenueService,
-        IBookService bookService, IDelayedQuoteService delayedQuoteService, IExchangeService exchangeService)
+        IBookService bookService, IDelayedQuoteService delayedQuoteService, IExchangeService exchangeService, IRealTimeService realTimeService)
     {
         _historicalPricesService = historicalPricesService;
         _quotesService = quotesService;
@@ -37,6 +38,7 @@ public class RealTimeDataController : ControllerBase
         _bookService = bookService;
         _delayedQuoteService = delayedQuoteService;
         _exchangeService = exchangeService;
+        _realTimeService = realTimeService;
     }
 
     [HttpGet("{symbol}/historical-prices")]
@@ -125,5 +127,13 @@ public class RealTimeDataController : ControllerBase
         var exchanges = await _exchangeService.GetExchangesAsync();
 
         return Ok(exchanges);
+    }
+
+    [HttpGet("{symbol}/real-time")]
+    public async Task<IActionResult> GetRealTimeDataAsync(string symbol)
+    {
+        var realTimeResponse = await _realTimeService.GetRealTimeDataAsync(symbol);
+
+        return Ok(realTimeResponse);
     }
 }

@@ -35,6 +35,7 @@ public static class ServiceExtensions
         services.AddScoped<ISymbolService, SymbolService>();
         services.AddScoped<IStockProfileService, StockProfileService>();
         services.AddScoped<IStockFundamentalsService, StockFundamentalsService>();
+        services.AddScoped<IRealTimeService, RealTimeService>();
     }
 
     public static void ConfigureRepositories(this IServiceCollection services)
